@@ -4,7 +4,7 @@
 # hash gives.
 #
 # Bump REF and the versions entry together: scripts/add-version.sh does both.
-set(HTTPANT_REF "1931b6bf9db7792872b1c2a71a315ea749167882")
+set(HTTPANT_REF "d4031a9c2adf8ffc55827acde24a2db2fd71daa1")
 
 # The canonical source is GitHub. HTTPANT_GIT_URL points it at a mirror or a
 # local checkout, which is how this registry is used offline or before the

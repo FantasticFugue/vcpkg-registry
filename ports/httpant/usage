@@ -1,0 +1,22 @@
+httpant is a C++23 module library, and it is sans-I/O by default: it parses and
+serializes HTTP/1.1, HTTP/2 and HTTP/3 and moves no bytes for you.
+
+    find_package(httpant CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE httpant::httpant)
+
+    import httpant;
+
+The native I/O engine is the `io` feature. With it enabled, an extra target
+compiles `import httpant.io;` — io_uring on Linux, IORing on Windows, kqueue on
+macOS and the BSDs:
+
+    vcpkg install httpant[io]
+    target_link_libraries(main PRIVATE httpant::httpant httpant::io)
+
+    import httpant.io;
+
+`httpant::httpant` links `httpant::imports` (the module wrappers over llhttp,
+nghttp2, nghttp3 and stdexec) publicly; consumers never import it directly.
+
+The compiler must build C++23 modules: `find_package(xclang CONFIG)` has to
+succeed, and the standard library must be available as a module (`xclang::std`).

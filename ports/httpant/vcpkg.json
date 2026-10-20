@@ -1,0 +1,35 @@
+{
+    "name": "httpant",
+    "version": "0.1.0",
+    "port-version": 0,
+    "description": "HTTP/1.1, HTTP/2 and HTTP/3 without I/O, plus an io_uring, kqueue and IORing completion engine behind one interface.",
+    "homepage": "https://github.com/tsurumi-yizhou/httpant",
+    "license": "MPL-2.0",
+    "supports": "!(uwp|android)",
+    "dependencies": [
+        "llhttp",
+        "nghttp2",
+        "nghttp3",
+        "stdexec",
+        {
+            "name": "vcpkg-cmake",
+            "host": true
+        },
+        {
+            "name": "vcpkg-cmake-config",
+            "host": true
+        }
+    ],
+    "default-features": [],
+    "features": {
+        "io": {
+            "description": "Build the native I/O engine (module httpant.io): io_uring on Linux, IORing on Windows, kqueue on macOS and the BSDs. Off by default: the library's default identity is sans-I/O.",
+            "dependencies": [
+                {
+                    "name": "liburing",
+                    "platform": "linux"
+                }
+            ]
+        }
+    }
+}

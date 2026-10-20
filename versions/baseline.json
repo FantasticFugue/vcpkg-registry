@@ -3,6 +3,18 @@
         "httpant": {
             "baseline": "0.1.0",
             "port-version": 0
+        },
+        "asio": {
+            "baseline": "1.38.2",
+            "port-version": 0
+        },
+        "llhttp": {
+            "baseline": "9.4.3",
+            "port-version": 0
+        },
+        "stdexec": {
+            "baseline": "2026-10-12",
+            "port-version": 0
         }
     }
 }

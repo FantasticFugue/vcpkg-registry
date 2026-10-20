@@ -1,0 +1,7 @@
+{
+  "name": "asio",
+  "version": "1.38.2",
+  "description": "Standalone Asio; latest upstream release reviewed on 2026-10-12.",
+  "homepage": "https://think-async.com/Asio/",
+  "license": "BSL-1.0"
+}

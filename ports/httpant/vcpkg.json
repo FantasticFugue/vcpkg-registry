@@ -1,6 +1,6 @@
 {
     "name": "httpant",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "port-version": 0,
     "description": "HTTP/1.1, HTTP/2 and HTTP/3 without I/O, plus an io_uring, kqueue and IORing completion engine behind one interface.",
     "homepage": "https://github.com/tsurumi-yizhou/httpant",
@@ -10,7 +10,10 @@
         "llhttp",
         "nghttp2",
         "nghttp3",
-        "stdexec",
+        {
+            "name": "stdexec",
+            "version>=": "2026-10-21"
+        },
         {
             "name": "vcpkg-cmake",
             "host": true

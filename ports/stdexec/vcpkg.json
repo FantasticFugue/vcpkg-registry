@@ -1,7 +1,7 @@
 {
   "name": "stdexec",
-  "version-date": "2026-10-12",
-  "description": "Reviewed stdexec headers and imported target.",
+  "version-date": "2026-10-21",
+  "description": "Reviewed stdexec headers with execution-module exports.",
   "homepage": "https://github.com/NVIDIA/stdexec",
   "license": "Apache-2.0 WITH LLVM-exception"
 }

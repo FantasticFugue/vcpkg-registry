@@ -7,16 +7,28 @@ serializes HTTP/1.1, HTTP/2 and HTTP/3 and moves no bytes for you.
     import httpant;
 
 The native I/O engine is the `io` feature. With it enabled, an extra target
-compiles `import httpant.io;` — io_uring on Linux, IORing on Windows, kqueue on
-macOS and the BSDs:
+compiles `import httpant.io;` with asio as the default on every platform:
 
     vcpkg install httpant[io]
     target_link_libraries(main PRIVATE httpant::httpant httpant::io)
 
     import httpant.io;
 
+The package uses the backend selected when it was built: `httpant[io,uring]`
+selects io_uring on Linux; otherwise `httpant[io]` selects asio.
+
 `httpant::httpant` links `httpant::imports` (the module wrappers over llhttp,
 nghttp2, nghttp3 and stdexec) publicly; consumers never import it directly.
+
+The `tls` feature adds wolfSSL and the transport-generic TLS module:
+
+    vcpkg install httpant[tls]
+    target_link_libraries(main PRIVATE httpant::tls)
+
+    import httpant.tls;
+
+The caller supplies the byte stream. Select `httpant[io,tls]` to also use the
+native I/O engine.
 
 The compiler must build C++23 modules: `find_package(xclang CONFIG)` has to
 succeed, and the standard library must be available as a module (`xclang::std`).

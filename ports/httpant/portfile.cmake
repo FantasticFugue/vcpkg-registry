@@ -1,51 +1,23 @@
-# httpant is a C++23 module library, so the source is pinned by commit rather
-# than by a release tarball: vcpkg verifies the checked-out tree against the
-# `git-tree` in versions/h-/httpant.json, which is the same guarantee a tarball
-# hash gives.
-#
-# Bump REF and the versions entry together: scripts/add-version.sh does both.
-set(HTTPANT_REF "3c9a61bff29044ea0e74cd9896d167802581ed45")
+# Build the current sibling checkout through the current overlay port.
+get_filename_component(SOURCE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../httpant" ABSOLUTE)
 
-# The canonical source is GitHub. HTTPANT_GIT_URL points it at a mirror or a
-# local checkout, which is how this registry is used offline or before the
-# upstream repository is published.
-if(DEFINED ENV{HTTPANT_GIT_URL})
-    set(HTTPANT_GIT_URL "$ENV{HTTPANT_GIT_URL}")
-endif()
-if(NOT DEFINED HTTPANT_GIT_URL)
-    set(HTTPANT_GIT_URL "https://github.com/tsurumi-yizhou/httpant.git")
-endif()
-
-vcpkg_from_git(
-    OUT_SOURCE_PATH SOURCE_PATH
-    URL "${HTTPANT_GIT_URL}"
-    REF "${HTTPANT_REF}"
-)
-
-# Upstream submission: microsoft/vcpkg wants vcpkg_from_github with a tag and a
-# tarball SHA512 instead. Replace the call above with this once httpant tags
-# releases, and fill the hash from vcpkg's own error message:
-#
-# vcpkg_from_github(
-#     OUT_SOURCE_PATH SOURCE_PATH
-#     REPO tsurumi-yizhou/httpant
-#     REF "v${VERSION}"
-#     SHA512 <sha512 of the tag tarball>
-#     HEAD_REF main
-# )
-
-# The engine is a feature, not a default: httpant ships as a sans-I/O library
-# unless the consumer asks for httpant::io.
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
+        tls HTTPANT_ENABLE_TLS
         io HTTPANT_ENABLE_IO
+        quic HTTPANT_ENABLE_QUIC
 )
+set(IO_BACKEND asio)
+if("uring" IN_LIST FEATURES)
+    set(IO_BACKEND uring)
+endif()
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
         ${FEATURE_OPTIONS}
+        -DHTTPANT_IO_BACKEND=${IO_BACKEND}
         -DBUILD_TESTING=OFF
-        -DENABLE_EXAMPLES=OFF
+        -DCMAKE_SKIP_INSTALL_ALL_DEPENDENCY=ON
 )
 vcpkg_cmake_install()
 vcpkg_cmake_config_fixup(CONFIG_PATH lib/cmake/httpant PACKAGE_NAME httpant)

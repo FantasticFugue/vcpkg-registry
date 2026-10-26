@@ -1,7 +1,7 @@
 # Fughetta vcpkg ports
 
 Current overlay ports for `httpant`, `stdexec`, `asio`, `llhttp`, `msquic` (2.6.3 with OpenSSL 3.5.9),
-`dpdk`, `c-ares` (1.34.9), `reflectcpp` (0.26.2), and `sqlite3` (3.54.1),
+`c-ares` (1.34.9), `reflectcpp` (0.26.2), and `sqlite3` (3.54.1),
 with xclang triplets for the workspace's C++ projects.
 
 ## Consume
@@ -30,12 +30,10 @@ directory with `cmake --preset <name>`; no shell exports or extra `-D` arguments
 are required.
 
 Trader lives beside this repository, so its overlay path is
-`../vcpkg-registry/ports`. It selects `httpant[io]` and the current DPDK
-port. The DPDK overlay retains `26.3#6` and builds Linux Ethernet drivers for
-ring, virtio, ixgbe, i40e, ice, and netvsc. Trader's toolchain selects host C
-APIs and xclang's C++ modules and static runtimes for its dependencies.
-See [Trader's README](../trader/README.md) for backend selection and current
-validation limits.
+`../vcpkg-registry/ports`. It selects `httpant[io]` on the default asio
+mechanism. Trader's toolchain selects host C APIs and xclang's C++ modules and
+static runtimes for its dependencies. See [Trader's README](../trader/README.md)
+for its build and current validation limits.
 
 ## Update a current port
 

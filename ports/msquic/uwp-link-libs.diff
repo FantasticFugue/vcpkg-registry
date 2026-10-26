@@ -1,0 +1,24 @@
+--- a/src/inc/CMakeLists.txt
++++ b/src/inc/CMakeLists.txt
+@@ -59,7 +59,7 @@
+ 
+ if(WIN32)
+     if(QUIC_UWP_BUILD)
+-        target_link_libraries(base_link INTERFACE OneCore ws2_32 ntdll)
++        target_link_libraries(base_link INTERFACE OneCoreUap ws2_32 ntdll)
+     elseif(QUIC_GAMECORE_BUILD)
+         target_link_libraries(base_link INTERFACE ntdll advapi32)
+         if(NOT QUIC_EXTERNAL_TOOLCHAIN)
+--- a/src/platform/CMakeLists.txt
++++ b/src/platform/CMakeLists.txt
+@@ -74,7 +74,9 @@
+         msquic_platform
+         PUBLIC
+         wbemuuid)
+-    target_link_libraries(msquic_platform PUBLIC winmm)
++    if(NOT QUIC_UWP_BUILD)
++        target_link_libraries(msquic_platform PUBLIC winmm)
++    endif()
+ endif()
+ 
+ target_link_libraries(msquic_platform PUBLIC inc)

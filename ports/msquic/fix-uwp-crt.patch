@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -697,7 +697,7 @@
+     if (NOT QUIC_STATIC_LINK_CRT AND NOT QUIC_STATIC_LINK_PARTIAL_CRT)
+         # We are using dynamic linking. Ensure that only the release version of CRT is used.
+         message(STATUS "Configuring for release version of dynamically linked CRT")
+-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
++        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+     endif()
+ 
+ else() #!WIN32

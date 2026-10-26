@@ -1,0 +1,34 @@
+--- a/src/bin/CMakeLists.txt
++++ b/src/bin/CMakeLists.txt
+@@ -274,7 +274,7 @@
+ endif()
+ 
+ if(BUILD_SHARED_LIBS)
+-    install(TARGETS msquic msquic_platform inc logging_inc warnings main_binary_link_args ${OTHER_TARGETS}
++    install(TARGETS msquic
+         EXPORT msquic
+         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+         LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+@@ -292,7 +292,7 @@
+ install(FILES ${CMAKE_BINARY_DIR}/msquic-config.cmake DESTINATION share/msquic)
+ 
+ if(BUILD_SHARED_LIBS)
+-    install(EXPORT msquic NAMESPACE msquic:: DESTINATION share/msquic)
++    install(EXPORT msquic DESTINATION share/msquic)
+ endif()
+ 
+ if (MSVC AND NOT QUIC_SANITIZER_ACTIVE AND BUILD_SHARED_LIBS)
+--- a/src/bin/msquic-config.cmake.in
++++ b/src/bin/msquic-config.cmake.in
+@@ -1,11 +1 @@
+-include(CMakeFindDependencyMacro)
+-
+ include("${CMAKE_CURRENT_LIST_DIR}/msquic.cmake")
+-
+-# Legacy names
+-if(NOT TARGET msquic)
+-    add_library(msquic ALIAS msquic::msquic)
+-endif()
+-if(NOT TARGET msquic_platform)
+-    add_library(msquic_platform ALIAS msquic::platform)
+-endif()

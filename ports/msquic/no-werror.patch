@@ -1,0 +1,20 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -263,7 +263,7 @@
+         message(FATAL_ERROR "-UseSystemOpenSSLCrypto is currently not supported on Windows platforms.")
+     endif()
+ 
+-    set(QUIC_WARNING_FLAGS /WX /W4 /sdl /wd4206 CACHE INTERNAL "")
++    set(QUIC_WARNING_FLAGS /W4 /sdl /wd4206 CACHE INTERNAL "")
+     set(QUIC_COMMON_FLAGS /utf-8)
+ 
+     include(CheckCCompilerFlag)
+@@ -377,7 +377,7 @@
+     if (HAS_SYSCTL)
+          list(APPEND QUIC_COMMON_DEFINES HAS_SYSCTL)
+     endif()
+-    set(QUIC_WARNING_FLAGS -Werror -Wall -Wextra -Wformat=2 -Wno-type-limits
++    set(QUIC_WARNING_FLAGS -Wall -Wextra -Wformat=2 -Wno-type-limits
+         -Wno-unknown-pragmas -Wno-multichar -Wno-missing-field-initializers
+         CACHE INTERNAL "")
+     if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)

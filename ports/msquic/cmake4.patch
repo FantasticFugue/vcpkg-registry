@@ -1,0 +1,10 @@
+--- a/submodules/CMakeLists.txt
++++ b/submodules/CMakeLists.txt
+@@ -275,7 +275,6 @@
+             endif()
+         endif()
+         
+-        list(APPEND OPENSSL_CONFIG_FLAGS -isysroot ${CMAKE_OSX_SYSROOT})
+         
+         if(SDK_NAME)
+             list(APPEND OPENSSL_CONFIG_FLAGS "-m${SDK_NAME}-version-min=${DEPLOYMENT_TARGET}")

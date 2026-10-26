@@ -1,128 +1,66 @@
-# Fughetta vcpkg registry
+# Fughetta vcpkg ports
 
-A [vcpkg git registry](https://learn.microsoft.com/vcpkg/users/registries) for
-the Fughetta family. It carries one port today, `httpant`, plus the xclang
-triplets that port needs.
+Current overlay ports for `httpant`, `stdexec`, `asio`, `llhttp`, `msquic` (2.6.3 with OpenSSL 3.5.9),
+`dpdk`, `c-ares` (1.34.9), `reflectcpp` (0.26.2), and `sqlite3` (3.54.1),
+with xclang triplets for the workspace's C++ projects.
 
-Two consumers, one source of truth:
+## Consume
 
-| Path | Consumer |
-| --- | --- |
-| this registry (self-hosted) | our own projects, private CI, anyone who wants the current commit |
-| `microsoft/vcpkg` (upstream) | everyone else; a PR against the official catalogue |
-
-The portfile is written so the upstream submission is a small, reviewable diff
-rather than a second implementation.
-
-## Layout
-
-```
-ports/httpant/          portfile.cmake, vcpkg.json, usage
-versions/               baseline.json + h-/httpant.json (the git-tree vcpkg verifies)
-triplets/               xclang triplets: x64/arm64 × linux/osx/windows
-scripts/add-version.sh  records a new httpant commit in all three files at once
-examples/               a consumer manifest and CMakeLists for smoke testing
-```
-
-## Consuming it
-
-In a project's `vcpkg-configuration.json`:
-
-Today the registry is local-only: nothing is pushed, and a consumer points at the
-directory instead of a URL. The git registry form works with any git checkout,
-local or hosted, so only the `repository` value changes when it is published:
+Keep `httpant`, `vcpkg-registry`, and the consuming project beside each other.
+The consumer's `vcpkg-configuration.json` selects the current port directory:
 
 ```json
 {
-    "default-registry": {
-        "kind": "git",
-        "repository": "https://github.com/microsoft/vcpkg",
-        "baseline": "818beed257310e1319826eb887651ba7ed61a29a"
-    },
-    "registries": [
-        {
-            "kind": "git",
-            "repository": "file:///home/yizhou/Fughetta/vcpkg-registry",
-            "baseline": "<a commit of this registry>",
-            "packages": ["httpant"]
-        }
-    ]
+    "overlay-ports": ["../vcpkg-registry/ports"]
 }
 ```
 
-The registry's `baseline` must name a commit of *this* repository, and that
-commit's `versions/baseline.json` decides which httpant version a consumer gets.
-Bumping a port therefore has two steps: add the version (see below) and move the
-consumer's baseline.
+The `httpant` port reads the sibling `../httpant` checkout. Its existing version
+is `0.2.0`, revision `0`. The port installs module sources and CMake package
+files; the consuming project's compiler builds those modules.
 
-xclang triplets ship here because `httpant` is a C++23 module library: it needs
-a compiler that scans modules and a standard library available as a module. Point
-vcpkg at them and export the compiler tree:
+Triplets include `triplets/httpant-source.cmake`, which adds current httpant
+module, import, CMake, manifest, and license files to the package cache key.
+Changes to those inputs invalidate the cached package through
+[VCPKG_HASH_ADDITIONAL_FILES](https://learn.microsoft.com/en-us/vcpkg/users/triplets#vcpkg_hash_additional_files).
 
-```sh
-export XCLANG_ROOT=/path/to/xclang
-vcpkg install httpant --triplet x64-linux-xclang --overlay-triplets=triplets
-```
+The consuming projects' Git-ignored local presets record `XCLANG_ROOT`,
+`VCPKG_ROOT`, the target, and triplet. Configure from the consuming project's
+directory with `cmake --preset <name>`; no shell exports or extra `-D` arguments
+are required.
 
-## Adding a version
+Trader lives beside this repository, so its overlay path is
+`../vcpkg-registry/ports`. It selects `httpant[io]` and the current DPDK
+port. The DPDK overlay retains `26.3#6` and builds Linux Ethernet drivers for
+ring, virtio, ixgbe, i40e, ice, and netvsc. Trader's toolchain selects host C
+APIs and xclang's C++ modules and static runtimes for its dependencies.
+See [Trader's README](../trader/README.md) for backend selection and current
+validation limits.
 
-```sh
-./scripts/add-version.sh 0.2.0 <httpant commit>
-```
+## Update a current port
 
-It writes the version into `ports/httpant/vcpkg.json`, pins `HTTPANT_REF` in the
-portfile, appends the entry to `versions/h-/httpant.json` with the **git-tree of
-`ports/httpant`** — what vcpkg verifies when it reads this registry, and the
-reason the port and its version entry land in one commit — and moves
-`versions/baseline.json` to the new version. The upstream source hash and the
-port-directory tree are two different things; the script computes both.
-
-Then check the plan resolves before committing:
+Edit `ports/<name>/` and refresh the existing version record:
 
 ```sh
-vcpkg install httpant --overlay-ports=ports/httpant \
-    --overlay-triplets=triplets --triplet x64-linux-xclang --dry-run
+./add-port-version httpant
 ```
 
-Never edit an entry that has been merged: vcpkg hashes the tree, and a rewritten
-history silently changes what a pinned consumer builds. Add a version; do not
-retouch one.
+The helper updates the matching entry's `git-tree`, preserving the version,
+revision, and number of entries. It stages the port directory. Creating a
+version requires explicit user approval.
 
-## What the port needs, and where it stands
+Consumers read overlay ports directly. The version records remain metadata
+for the existing entries.
 
-`httpant` is a C++23 module library, so the port does two unusual things:
+## Layout
 
-1. **It installs sources, not BMIs** (`share/httpant/modules`, `share/httpant/import`).
-   BMIs are compiler-specific; `httpant-config.cmake` rebuilds the three targets
-   (`httpant`, `httpant-io`, `httpant-imports`) in the consumer's build from
-   those sources.
-2. **It requires xclang.** `find_package(xclang CONFIG)` must succeed and the
-   standard library must be available as a module. The triplets here supply the
-   compiler; export `XCLANG_ROOT` and the triplet passes it through. That
-   requirement is deliberate — it is what the library is built on, not an
-   oversight — and it is also the main thing to argue about in an upstream PR.
+| Path | Contents |
+| --- | --- |
+| `ports/` | Current package definitions |
+| `versions/` | Existing version records |
+| `triplets/` | Target settings and source-cache inputs |
 
-Verified locally: the port builds and installs for `x64-linux-xclang`, and a
-consumer builds `import httpant;` plus `import httpant.io;` against the installed
-package. Building it needs the source, so a machine that cannot reach GitHub over
-git sets `HTTPANT_GIT_URL` to a local checkout — the portfile honours it and
-defaults to the GitHub URL.
+The reviewed stdexec port supplies the public execution-module exports and
+retains the `STDEXEC::stdexec` CMake target.
 
-## Path to `microsoft/vcpkg`
-
-The official catalogue wants a tag, a tarball and a SHA512. `portfile.cmake`
-carries the `vcpkg_from_github` block to swap in, commented, at the point of use.
-When `httpant` starts tagging releases:
-
-1. Tag `v0.2.0` in `httpant`.
-2. Replace `vcpkg_from_git` with `vcpkg_from_github(REPO … REF "v${VERSION}"
-   SHA512 <hash>)`; take the hash from vcpkg's own error message.
-3. Run `vcpkg x-add-version httpant` against a `microsoft/vcpkg` checkout, which
-   writes that repository's `versions/h-/httpant.json` — the git-tree entry here
-   is for this registry and does not transfer.
-4. Open the PR with `vcpkg install httpant` passing on the standard triplets.
-
-Step 4 is the real gate: the official catalogue builds with its own compilers,
-so an `xclang` requirement has to become either an `xclang` port or a documented
-`supports` restriction. Plan for that conversation before promising upstream
-availability.
+The service and gateway debug presets configured successfully.
